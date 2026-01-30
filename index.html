@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <i class="fas fa-parking"></i>
+            <h1>Smart Parking</h1>
+        </div>
+        <div class="nav-time">
+            <i class="fas fa-clock"></i>
+            <span id="currentTime"></span>
+        </div>
+        <div class="nav-status">
+            <div class="status-indicator" id="apiStatusIndicator"></div>
+            <span id="apiStatusText">Backend Connected</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="welcome">
+                <h2>Welcome to Parking Management</h2>
+                <p>Manage your parking facility efficiently</p>
+            </div>
+            <div class="header-stats">
+                <div class="mini-stat">
+                    <i class="fas fa-car"></i>
+                    <div>
+                        <h4 id="totalVehicles">0</h4>
+                        <small>Vehicles</small>
+                    </div>
+                </div>
+                <div class="mini-stat">
+                    <i class="fas fa-parking"></i>
+                    <div>
+                        <h4 id="freeSlots">12</h4>
+                        <small>Free Slots</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Alert Box -->
+        <div class="alert-box" id="alertBox"></div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card">
+                <h3><i class="fas fa-car"></i> Register Vehicle</h3>
+                <div class="action-form">
+                    <input type="text" id="licensePlate" placeholder="Enter license plate">
+                    <button class="btn-primary" onclick="addVehicle()">
+                        <i class="fas fa-plus"></i> Add Vehicle
+                    </button>
+                </div>
+            </div>
+            
+            <div class="action-card">
+                <h3><i class="fas fa-exchange-alt"></i> Quick Park</h3>
+                <div class="action-form">
+                    <input type="text" id="plateToPark" placeholder="Vehicle plate">
+                    <select id="slotToPark">
+                        <option value="">Select slot</option>
+                    </select>
+                    <button class="btn-success" onclick="parkVehicle()">
+                        <i class="fas fa-parking"></i> Park
+                    </button>
+                </div>
+            </div>
+            
+            <div class="action-card">
+                <h3><i class="fas fa-sign-out-alt"></i> Quick Unpark</h3>
+                <div class="action-form">
+                    <input type="text" id="plateToUnpark" placeholder="Vehicle plate">
+                    <button class="btn-danger" onclick="unparkVehicle()">
+                        <i class="fas fa-car"></i> Unpark
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard-grid">
+            <!-- Parking Slots Visualization -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <h3><i class="fas fa-parking"></i> Live Parking Status</h3>
+                    <div class="legend">
+                        <span class="legend-free"><i class="fas fa-square"></i> Free</span>
+                        <span class="legend-occupied"><i class="fas fa-square"></i> Occupied</span>
+                        <span class="legend-reserved"><i class="fas fa-square"></i> Reserved</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="parking-lot">
+                        <div class="slot-grid" id="slotGrid">
+                            <!-- Slots will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle List -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Vehicle List</h3>
+                    <button class="btn-refresh" onclick="refreshVehicles()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="vehicle-table">
+                            <thead>
+                                <tr>
+                                    <th>License Plate</th>
+                                    <th>Status</th>
+                                    <th>Slot</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vehicleTableBody">
+                                <tr>
+                                    <td colspan="3" class="empty">No vehicles registered</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Statistics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="stats-list">
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: #4A90E2;">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="statsTotalVehicles">0</h4>
+                                <p>Total Vehicles</p>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: #7ED321;">
+                                <i class="fas fa-parking"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="statsFreeSlots">12</h4>
+                                <p>Free Slots</p>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: #F5A623;">
+                                <i class="fas fa-signal"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="statsOccupiedSlots">0</h4>
+                                <p>Occupied Slots</p>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon" style="background: #D0021B;">
+                                <i class="fas fa-rupee-sign"></i>
+                            </div>
+                            <div class="stat-details">
+                                <h4 id="statsRevenue">₹0</h4>
+                                <p>Today's Revenue</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Recent Transactions</h3>
+                    <span class="price-tag">₹50/hour</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Vehicle</th>
+                                    <th>Action</th>
+                                    <th>Slot</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTableBody">
+                                <tr>
+                                    <td colspan="5" class="empty">No transactions yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status at Bottom -->
+        <div class="system-status">
+            <h3><i class="fas fa-server"></i> System Status</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span>Backend API</span>
+                    <span class="status-value" id="apiStatus">Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span>Database</span>
+                    <span class="status-value">Connected</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span>Payment System</span>
+                    <span class="status-value">Ready</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot online"></span>
+                    <span>Security</span>
+                    <span class="status-value">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h4><i class="fas fa-code"></i> Parking Management System</h4>
+                <p>Full-stack parking solution with real-time management</p>
+            </div>
+            <div class="footer-contact">
+                <h4><i class="fas fa-user"></i> Developer</h4>
+                <p><strong>Kumar Harsh</strong></p>
+                <p><i class="fas fa-phone"></i> 9279157296</p>
+            </div>
+            <div class="footer-rates">
+                <h4><i class="fas fa-tag"></i> Parking Rates</h4>
+                <p><i class="fas fa-rupee-sign"></i> ₹50 per hour</p>
+                <p><i class="fas fa-clock"></i> Minimum: ₹50</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Parking Management System | Developed by <strong>Kumar Harsh</strong></p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
